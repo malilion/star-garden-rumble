@@ -8,7 +8,7 @@
 [![Three.js](https://img.shields.io/badge/Three.js-0.187-000000?logo=threedotjs&logoColor=white)](https://threejs.org/)
 [![Rapier](https://img.shields.io/badge/Rapier-0.21-e11d48)](https://rapier.rs/)
 [![Zustand](https://img.shields.io/badge/Zustand-5-433e38)](https://github.com/pmndrs/zustand)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/license/isc)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ![浮島庭院與守護球](docs/screenshots/01-garden.png)
 
@@ -61,4 +61,6 @@ npm run preview  # 預覽正式建置（含子路徑）
 
 ## 授權
 
-授權為 [ISC](https://opensource.org/license/isc)，與 `package.json` 的 `license` 欄位一致。此 repo 目前沒有獨立的 `LICENSE` 檔。
+本專案以 [MIT License](LICENSE) 授權。
+
+3D 模型使用 [Hyper3D Rodin](https://hyper3d.ai/) 生成，同樣依 MIT 授權釋出。
