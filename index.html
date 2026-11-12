@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>星之庭院保衛戰 Star Garden Rumble</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="popups"></div>
+    <div id="hud">
+      <div class="hud-left">
+        <div class="score" id="score">0</div>
+        <div class="sub">最高 <span id="best">0</span></div>
+      </div>
+      <div class="hud-center">
+        <div class="wave">第 <span id="wave">1</span> 波</div>
+        <div class="hp" id="hp"></div>
+      </div>
+      <div class="hud-right">
+        <div class="combo" id="combo">x1</div>
+        <div class="combo-bar"><i id="combo-bar"></i></div>
+      </div>
+    </div>
+    <div id="hint">按住拖曳向後拉，放開彈射守護球 — 把小怪撞出浮島！</div>
+    <div id="overlay" hidden>
+      <div class="panel">
+        <h1>水晶破碎了…</h1>
+        <p>分數 <b id="final-score">0</b>　擊飛 <b id="final-kills">0</b>　到達第 <b id="final-wave">1</b> 波</p>
+        <button id="restart">再來一局</button>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

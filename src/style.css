@@ -1,0 +1,45 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1030; }
+body { font-family: "Trebuchet MS", "PingFang TC", "Microsoft JhengHei", sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#game.aiming { cursor: grabbing; }
+
+#hud { position: fixed; inset: 0 0 auto 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 20px; pointer-events: none; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
+.hud-left, .hud-right { min-width: 120px; }
+.hud-right { text-align: right; }
+.hud-center { text-align: center; }
+.score { font-size: 40px; font-weight: 900; color: #ffe066; line-height: 1; }
+.score.pop, .combo.pop { animation: pop .18s ease-out; }
+.sub { font-size: 13px; opacity: .75; margin-top: 4px; }
+.wave { font-size: 18px; font-weight: 700; }
+.hp { font-size: 20px; letter-spacing: 3px; margin-top: 4px; color: #7ff3ff; }
+.hp .lost { opacity: .2; }
+.combo { font-size: 34px; font-weight: 900; color: #ff8fd0; line-height: 1; transform-origin: right center; }
+.combo.idle { opacity: .35; }
+.combo-bar { width: 120px; height: 6px; margin: 6px 0 0 auto; border-radius: 3px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.combo-bar i { display: block; height: 100%; width: 0; background: #ff8fd0; }
+
+#hint { position: fixed; left: 0; right: 0; bottom: 18px; text-align: center; font-size: 14px; opacity: .8; pointer-events: none; transition: opacity .6s; padding: 0 16px; }
+#hint.gone { opacity: 0; }
+
+#popups { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.popup { position: absolute; font-weight: 900; font-size: 24px; color: #ffe066; text-shadow: 0 2px 0 #b3541e, 0 0 10px rgba(255, 200, 60, .6); white-space: nowrap; animation: bounce-up .9s cubic-bezier(.2, 1.4, .4, 1) forwards; }
+.popup.big { font-size: 36px; color: #fff3a6; }
+.popup.bad { color: #ff6b81; text-shadow: 0 2px 0 #7a1630; }
+.popup.small { font-size: 16px; color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, .5); }
+
+#overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8, 10, 35, .72); }
+#overlay[hidden] { display: none; }
+.panel { text-align: center; padding: 28px 36px; border-radius: 18px; background: #1b2260; box-shadow: 0 10px 0 #0d1140; max-width: 90vw; }
+.panel h1 { margin: 0 0 10px; color: #7ff3ff; }
+.panel b { color: #ffe066; font-size: 1.3em; }
+button { font: inherit; font-weight: 900; font-size: 20px; color: #3b2500; background: #ffd23f; border: 0; border-radius: 12px; padding: 12px 28px; margin-top: 10px; box-shadow: 0 5px 0 #c48a00; cursor: pointer; }
+button:active { transform: translateY(3px); box-shadow: 0 2px 0 #c48a00; }
+
+@keyframes pop { 0% { transform: scale(1.45); } 100% { transform: scale(1); } }
+@keyframes bounce-up {
+  0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; }
+  25% { transform: translate(-50%, -120%) scale(1.25); opacity: 1; }
+  70% { transform: translate(-50%, -190%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -260%) scale(.8); opacity: 0; }
+}
