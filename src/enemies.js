@@ -1,23 +1,15 @@
-import * as THREE from 'three';
 import { CFG } from './config.js';
+import { instance } from './models.js';
 
 const ACCEL = 14; // 追擊水晶時的最大水平加速度
 
 /** 敵人生成池：依類型重複利用剛體與 Mesh，避免頻繁建立 / 銷毀 WASM 物件。 */
 export class EnemyPool {
-  constructor(RAPIER, world, scene, registry) {
-    Object.assign(this, { RAPIER, world, scene, registry });
+  constructor(RAPIER, world, scene, registry, models) {
+    Object.assign(this, { RAPIER, world, scene, registry, models });
     this.active = [];
     this.free = {};
-    this.geo = {};
-    this.mat = {};
-    this.eyeGeo = new THREE.SphereGeometry(1, 6, 4);
-    this.eyeMat = new THREE.MeshBasicMaterial({ color: 0x1b1040 });
-    for (const [key, t] of Object.entries(CFG.enemies.types)) {
-      this.free[key] = [];
-      this.geo[key] = new THREE.IcosahedronGeometry(t.radius, 1);
-      this.mat[key] = new THREE.MeshStandardMaterial({ color: t.color, flatShading: true, roughness: 0.6 });
-    }
+    for (const key of Object.keys(CFG.enemies.types)) this.free[key] = [];
   }
 
   _create(key) {
@@ -28,14 +20,8 @@ export class EnemyPool {
       RAPIER.ColliderDesc.ball(cfg.radius).setDensity(cfg.density).setRestitution(0.6).setFriction(0.8).setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
       body,
     );
-    const mesh = new THREE.Mesh(this.geo[key], this.mat[key]);
-    mesh.castShadow = true;
-    for (const sx of [-1, 1]) {
-      const eye = new THREE.Mesh(this.eyeGeo, this.eyeMat);
-      eye.scale.setScalar(cfg.radius * 0.17);
-      eye.position.set(sx * cfg.radius * 0.35, cfg.radius * 0.3, cfg.radius * 0.88);
-      mesh.add(eye);
-    }
+    // 刺蝟球模型（含刺的外徑約 0.93），縮放到與碰撞球同大
+    const mesh = instance(this.models.urchin[cfg.model], { scale: cfg.radius / 0.93 });
     this.scene.add(mesh);
     const e = { key, cfg, body, collider, mesh, active: false, stun: 0, hitCd: 0, punch: 0, speed: cfg.speed, prevVel: { x: 0, y: 0, z: 0 } };
     this.registry.set(collider.handle, { kind: 'enemy', ref: e });

@@ -16,13 +16,14 @@ export const CFG = {
     fenceRestitution: 0.8,
   },
 
-  crystal: { radius: 1.0, hp: 5 },
+  crystal: { radius: 1.0, hp: 5, visualScale: 1.6 },
 
   bumpers: {
     ringRadius: 6,
     count: 3,
     radius: 0.8,
     halfHeight: 0.6,
+    visualScale: 1.1, // 蘑菇模型高度的一半
     kick: 9, // 撞上蘑菇獲得的速度增量 (m/s)
   },
 
@@ -46,8 +47,8 @@ export const CFG = {
     hitStun: 0.9, // 被撞後暫停追擊的秒數
     minImpact: 2, // 低於此相對速度不算有效撞擊
     types: {
-      slime: { radius: 0.5, density: 1, speed: 2.2, color: 0xff7ac8, knock: 1.0, lift: 0.3, value: 1, heavy: false },
-      brute: { radius: 0.85, density: 1.5, speed: 1.5, color: 0x5a4bd6, knock: 0.5, lift: 0.15, value: 3, heavy: true },
+      slime: { model: 1, radius: 0.5, density: 1, speed: 2.2, color: 0xff7ac8, knock: 1.0, lift: 0.3, value: 1, heavy: false },
+      brute: { model: 0, radius: 0.85, density: 1.5, speed: 1.5, color: 0x5a4bd6, knock: 0.5, lift: 0.15, value: 3, heavy: true },
     },
   },
 

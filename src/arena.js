@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { CFG } from './config.js';
+import { instance } from './models.js';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.85, ...extra });
 
 /** 建立固定的圓形浮島地面、帶缺口的環狀圍欄、中央水晶與彈力蘑菇。 */
-export function buildArena(RAPIER, world, scene, registry) {
+export function buildArena(RAPIER, world, scene, registry, models) {
   const A = CFG.arena;
 
   // --- 浮島地面：固定圓柱 Collider，頂面位於 y = 0 ---
@@ -12,17 +13,11 @@ export function buildArena(RAPIER, world, scene, registry) {
   const ground = world.createCollider(RAPIER.ColliderDesc.cylinder(A.thickness / 2, A.radius).setFriction(0.9).setRestitution(0.2), groundBody);
   registry.set(ground.handle, { kind: 'ground' });
 
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(A.radius, A.radius, A.thickness, 28), flat(0x7fd66b));
-  top.position.y = -A.thickness / 2;
-  top.receiveShadow = true;
-  const rock = new THREE.Mesh(new THREE.ConeGeometry(A.radius * 0.96, 9, 9), flat(0x8a6a4f));
-  rock.rotation.x = Math.PI;
-  rock.position.y = -A.thickness - 4.5;
-  const centerPad = new THREE.Mesh(new THREE.CircleGeometry(2.4, 20), flat(0xa7e88f));
-  centerPad.rotation.x = -Math.PI / 2;
-  centerPad.position.y = 0.01;
-  centerPad.receiveShadow = true;
-  scene.add(top, rock, centerPad);
+  // 浮島模型：縮放到與物理地面同寬，並讓（已壓平的）頂面對齊 y = 0
+  const island = instance(models.island[0], { scale: A.radius * 1.03 });
+  island.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; } });
+  island.position.y = 0.06 - new THREE.Box3().setFromObject(island).max.y;
+  scene.add(island);
 
   // --- 環狀圍欄：多段長方體排成弧形，弧段之間留缺口供 Ring Out ---
   const fenceBody = world.createRigidBody(RAPIER.RigidBodyDesc.fixed());
@@ -58,13 +53,8 @@ export function buildArena(RAPIER, world, scene, registry) {
   const C = CFG.crystal;
   const crystalBody = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, C.radius, 0));
   const crystalCol = world.createCollider(RAPIER.ColliderDesc.ball(C.radius).setRestitution(0.7), crystalBody);
-  const crystalMesh = new THREE.Mesh(
-    new THREE.OctahedronGeometry(C.radius, 0),
-    flat(0x7ff3ff, { emissive: 0x2bb8d6, emissiveIntensity: 0.9, roughness: 0.3 }),
-  );
-  crystalMesh.scale.set(0.85, 1.5, 0.85);
+  const crystalMesh = instance(models.crystal[0], { scale: C.visualScale });
   crystalMesh.position.y = 1.6;
-  crystalMesh.castShadow = true;
   const crystalLight = new THREE.PointLight(0x7ff3ff, 30, 10);
   crystalLight.position.y = 2;
   scene.add(crystalMesh, crystalLight);
@@ -74,8 +64,6 @@ export function buildArena(RAPIER, world, scene, registry) {
   // --- 彈力蘑菇 (Bumper) ---
   const B = CFG.bumpers;
   const bumpers = [];
-  const stemGeo = new THREE.CylinderGeometry(B.radius * 0.55, B.radius * 0.7, B.halfHeight * 1.4, 8);
-  const capGeo = new THREE.SphereGeometry(B.radius * 1.15, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2);
   for (let i = 0; i < B.count; i++) {
     const a = (i / B.count) * Math.PI * 2 + Math.PI / 2;
     const x = Math.cos(a) * B.ringRadius, z = Math.sin(a) * B.ringRadius;
@@ -84,14 +72,9 @@ export function buildArena(RAPIER, world, scene, registry) {
       RAPIER.ColliderDesc.cylinder(B.halfHeight, B.radius).setRestitution(1).setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max),
       body,
     );
-    const group = new THREE.Group();
-    const stem = new THREE.Mesh(stemGeo, flat(0xfff3d6));
-    stem.position.y = B.halfHeight * 0.7;
-    const cap = new THREE.Mesh(capGeo, flat(0xff5a5a));
-    cap.position.y = B.halfHeight * 1.2;
-    cap.scale.y = 0.75;
-    stem.castShadow = cap.castShadow = true;
-    group.add(stem, cap);
+    // 模型底部貼地，縮放動畫以地面為支點
+    const group = instance(models.mushroom[i % models.mushroom.length], { scale: B.visualScale, y: B.visualScale });
+    group.rotation.y = -a + Math.PI / 2; // 正面朝外
     group.position.set(x, 0, z);
     scene.add(group);
     const bumper = { x, z, mesh: group, punch: 0 };
@@ -104,7 +87,7 @@ export function buildArena(RAPIER, world, scene, registry) {
     t += dt;
     crystal.punch = Math.max(0, crystal.punch - dt * 4);
     const cs = 1 + crystal.punch * 0.35;
-    crystalMesh.scale.set(0.85 * cs, 1.5 * cs, 0.85 * cs);
+    crystalMesh.scale.setScalar(cs);
     crystalMesh.rotation.y = t * 0.9;
     crystalMesh.position.y = 1.6 + Math.sin(t * 2) * 0.12;
     for (const b of bumpers) {

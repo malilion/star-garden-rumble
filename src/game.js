@@ -7,9 +7,10 @@ import { createPlayer } from './player.js';
 import { EnemyPool } from './enemies.js';
 import { createFx } from './fx.js';
 import { initHud } from './hud.js';
+import { loadModels } from './models.js';
 
 export async function createGame(canvas) {
-  await RAPIER.init();
+  const [models] = await Promise.all([loadModels(), RAPIER.init()]);
 
   // ---------- Three.js ----------
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -43,11 +44,11 @@ export async function createGame(canvas) {
   const events = new RAPIER.EventQueue(true);
   const registry = new Map(); // collider handle -> { kind, ref }
 
-  const arena = buildArena(RAPIER, world, scene, registry);
+  const arena = buildArena(RAPIER, world, scene, registry, models);
   const fx = createFx(scene, camera, document.getElementById('popups'));
-  const enemies = new EnemyPool(RAPIER, world, scene, registry);
+  const enemies = new EnemyPool(RAPIER, world, scene, registry, models);
   const hud = initHud(restart);
-  const player = createPlayer(RAPIER, world, scene, camera, canvas, registry, {
+  const player = createPlayer(RAPIER, world, scene, camera, canvas, registry, models, {
     canAim: () => !store.getState().over,
     onLaunch: () => hud.hideHint(),
   });

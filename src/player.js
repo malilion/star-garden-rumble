@@ -3,12 +3,13 @@ import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { CFG } from './config.js';
+import { instance } from './models.js';
 
 const P = CFG.player;
 const AIM_Y = 0.12; // 瞄準線貼地高度
 
 /** 主控守護球 + 彈射（Slingshot）操控。 */
-export function createPlayer(RAPIER, world, scene, camera, dom, registry, { canAim, onLaunch }) {
+export function createPlayer(RAPIER, world, scene, camera, dom, registry, models, { canAim, onLaunch }) {
   // --- 剛體：高彈性動態球 ---
   const body = world.createRigidBody(
     RAPIER.RigidBodyDesc.dynamic()
@@ -27,11 +28,8 @@ export function createPlayer(RAPIER, world, scene, camera, dom, registry, { canA
   );
   registry.set(collider.handle, { kind: 'player' });
 
-  const mesh = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(P.radius, 1),
-    new THREE.MeshStandardMaterial({ color: 0xfff2a8, emissive: 0xffb300, emissiveIntensity: 0.45, flatShading: true, roughness: 0.4 }),
-  );
-  mesh.castShadow = true;
+  // 皇冠精靈模型：身體球半徑約 0.8、球心在模型原點下方 0.2（上方是皇冠）
+  const mesh = instance(models.sprite[0], { scale: P.radius / 0.8, y: 0.2 * (P.radius / 0.8) });
   const marker = new THREE.Mesh(
     new THREE.RingGeometry(P.radius * 1.25, P.radius * 1.5, 24),
     new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 }),
@@ -159,7 +157,9 @@ export function createPlayer(RAPIER, world, scene, camera, dom, registry, { canA
     sync() {
       const p = body.translation();
       mesh.position.copy(p);
-      mesh.quaternion.copy(body.rotation());
+      // 精靈保持直立，只轉向移動方向（不跟著剛體翻滾）
+      const v = body.linvel();
+      if (Math.hypot(v.x, v.z) > 0.8) mesh.rotation.y = Math.atan2(v.x, v.z);
       marker.position.set(p.x, 0.03, p.z);
       marker.visible = p.y > 0 && p.y < 4 && Math.hypot(p.x, p.z) < CFG.arena.radius;
       updateAim();
